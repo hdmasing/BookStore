@@ -15,6 +15,7 @@ namespace BookStore.Models
         public Boolean Paid { get; set; }
 
         public virtual ICollection<Book> Items { get; set; }
+       
 
         public ShoppingCart()
         {
@@ -24,10 +25,16 @@ namespace BookStore.Models
             Items = new List<Book>();
         }
 
-        public void AddToCart(Book book)
+       public void AddToCart(Book book)
         {
             Items.Add(book);
             Sum += book.Price;
+        }
+
+        public void PayForCart(ShoppingCart cart)
+        {
+            Boolean ispaid = true;
+            cart.Paid = ispaid;
         }
     }
 }

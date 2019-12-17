@@ -14,12 +14,12 @@ namespace BookStore.Controllers
     public class ShoppingCartsController : Controller
     {
         private BookStoreDbContext db = new BookStoreDbContext();
-
         // GET: ShoppingCarts
         public ActionResult Index()
         {
-            return View(db.ShoppingCarts.ToList());
+            return View(db.ShoppingCarts.OrderByDescending(x => x.DateCreated).ToList());
         }
+
 
         // GET: ShoppingCarts/Details/5
         public ActionResult Details(Guid? id)
@@ -42,12 +42,14 @@ namespace BookStore.Controllers
             return View();
         }
 
+        
+
         // POST: ShoppingCarts/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Sum,DateCreated,Paid")] ShoppingCart shoppingCart)
+        public ActionResult Create([Bind(Include = "Id,Sum,DateCreated")] ShoppingCart shoppingCart)
         {
             if (ModelState.IsValid)
             {
@@ -80,7 +82,7 @@ namespace BookStore.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Sum,DateCreated,Paid")] ShoppingCart shoppingCart)
+        public ActionResult Edit([Bind(Include = "Id,Sum,DateCreated")] ShoppingCart shoppingCart)
         {
             if (ModelState.IsValid)
             {
@@ -105,7 +107,29 @@ namespace BookStore.Controllers
             }
             return View(shoppingCart);
         }
+       
+            public ActionResult PayForCart(Guid? id)
+            {
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
 
+                ShoppingCart shoppingCart = db.ShoppingCarts.Find(id);
+                if (shoppingCart == null)
+                {
+                    return HttpNotFound();
+                }
+
+            shoppingCart.Paid = true;
+
+                
+                db.SaveChanges();
+
+                //return RedirectToAction("Index", "ShoppingCarts");
+                return RedirectToAction("Details", "ShoppingCarts", new { id = shoppingCart.Id });
+            }
+        
         // POST: ShoppingCarts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

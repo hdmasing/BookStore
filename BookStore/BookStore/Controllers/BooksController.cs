@@ -59,7 +59,31 @@ namespace BookStore.Controllers
 
             return View(book);
         }
+        public ActionResult AddToCart(Guid? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
+            Book book = db.Books.Find(id);
+            if (book == null)
+            {
+                return HttpNotFound();
+            }
+
+            var shoppingCart = db.ShoppingCarts.OrderByDescending(x => x.DateCreated).FirstOrDefault();
+            if (shoppingCart == null)
+            {
+                shoppingCart = db.ShoppingCarts.Add(new ShoppingCart());
+            }
+
+            shoppingCart.AddToCart(book);
+            db.SaveChanges();
+
+            //return RedirectToAction("Index", "ShoppingCarts");
+            return RedirectToAction("Details", "ShoppingCarts", new { id = shoppingCart.Id });
+        }
         // GET: Books/Edit/5
         public ActionResult Edit(Guid? id)
         {
